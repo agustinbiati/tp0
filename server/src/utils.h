@@ -12,6 +12,7 @@
 #include<assert.h>
 
 #define PUERTO "4444"
+#define _GNU_SOURCE
 
 typedef enum
 {

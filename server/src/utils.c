@@ -4,27 +4,59 @@ t_log* logger;
 
 int iniciar_servidor(void)
 {
-	// Quitar esta línea cuando hayamos terminado de implementar la funcion
-	assert(!"no implementado!");
-
+	
 	int socket_servidor;
 
 	struct addrinfo hints, *servinfo, *p;
 
 	memset(&hints, 0, sizeof(hints));
-	hints.ai_family = AF_INET;
-	hints.ai_socktype = SOCK_STREAM;
+	hints.ai_family = AF_INET; // usa conexion IPV4
+	hints.ai_socktype = SOCK_STREAM; // usa conexion TCP
 	hints.ai_flags = AI_PASSIVE;
 
 	getaddrinfo(NULL, PUERTO, &hints, &servinfo);
 
 	// Creamos el socket de escucha del servidor
 
+	// socket:	hace que el SO cree un endpoint,
+	//			devuelve un file_descriptor 
+	//			que usa el SO
+
+	socket_servidor = socket(
+				servinfo->ai_family,
+				servinfo->ai_socktype,
+				servinfo->ai_protocol
+	);
+
 	// Asociamos el socket a un puerto
+
+	//bind:		asocia el socket a una IP
+	//			y a un numero de puerto
+
+	bind(socket_servidor,servinfo->ai_addr,servinfo->ai_addrlen);
 
 	// Escuchamos las conexiones entrantes
 
+	//listen:	deja en espera a una conexion 
+	//			del usuario (modo pasivo)
+	//SOMAXCONN:maximo de peticiones admitidas
+
+	listen(socket_servidor,SOMAXCONN);
+
+if (bind(socket_servidor, servinfo->ai_addr, servinfo->ai_addrlen) == -1) {
+    perror("Fallo el bind"); 
+    return -1;
+}
+
+if (listen(socket_servidor, SOMAXCONN) == -1) {
+    perror("Fallo el listen");
+    return -1;
+}
+
 	freeaddrinfo(servinfo);
+
+	// freeaddrinfo(servinfo): reserva memoria dinamicamente
+
 	log_trace(logger, "Listo para escuchar a mi cliente");
 
 	return socket_servidor;
@@ -32,11 +64,9 @@ int iniciar_servidor(void)
 
 int esperar_cliente(int socket_servidor)
 {
-	// Quitar esta línea cuando hayamos terminado de implementar la funcion
-	assert(!"no implementado!");
 
 	// Aceptamos un nuevo cliente
-	int socket_cliente;
+	int socket_cliente = accept(socket_servidor,NULL,NULL);
 	log_info(logger, "Se conecto un cliente!");
 
 	return socket_cliente;
